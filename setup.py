@@ -1,6 +1,6 @@
 #region modules
 from setuptools import setup, find_packages
-from Cython.Build import cythonize
+# from Cython.Build import cythonize
 #endregions
 
 #region variables
