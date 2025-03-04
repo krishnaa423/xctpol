@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 #region functions
 setup(
     name='xctpol',
-    version='1.0.0',
+    version='1.0.1',
     description='Exciton-polaron calculations',
     author='Krishnaa Vadivel',
     author_email='krishnaa.vadivel@yale.edu',
