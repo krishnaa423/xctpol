@@ -286,6 +286,7 @@ def logtime(func):
 
 class SteSerial:
     iter: int = -1
+    
     def __init__(
         self,
         temp: float,
