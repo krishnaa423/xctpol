@@ -441,6 +441,10 @@ class XHam:
             self.xham.assemble()
 
         # Solve.
+        self.eps: SLEPc.EPS = SLEPc.EPS().create()
+        self.eps.setOperators(self.xham)
+        self.eps.setWhichEigenpairs(SLEPc.EPS.Which.SMALLEST_REAL)
+        self.eps.setUp()
         self.eps.solve()
 
         # Extract.
@@ -547,6 +551,10 @@ class PHam:
             self.pham.assemble()
 
         # Solve.
+        self.eps: SLEPc.EPS = SLEPc.EPS().create()
+        self.eps.setOperators(self.pham)
+        self.eps.setWhichEigenpairs(SLEPc.EPS.Which.SMALLEST_REAL)
+        self.eps.setUp()
         self.eps.solve()
 
         # Extract.
@@ -698,5 +706,39 @@ class Ste:
     def STE_write(self):
         self.xeigpairs.writex()
         self.peigpairs.writep() 
+
+    @logtime
+    def STE_debug_write(self):
+        # Debug data to look at. 
+        data = {
+            'vecs': {
+                'exciton_energies': self.xcteigs.xct_eigs,
+                'phonon_energies': self.pheigs.ph_eigs,
+                'pocc': self.pocc.np,
+                'xeigs': self.xeigpairs.xeigs,
+                'peigs': self.peigpairs.peigs,
+            },
+            'mats': {
+                'h0': self.xham.h0,
+                'xham': self.xham.xham,
+                'se_tp': self.se_tp.se_tp,
+                'se_fm': self.se_fm.se_fm,
+                'se_bb': self.se_bb.se_bb,
+                'xctph_x': self.xctph.buffer,
+                'xctph_p': self.xctph.buffer_p,
+                'xevecs': self.xeigpairs.xevecs,
+                'pevecs': self.peigpairs.pevecs,
+            }
+        }
+
+        # Write vecs and mats to file. 
+        with h5py.File('debug_ste.h5', 'w', driver='mpio', comm=MPI.COMM_WORLD) as w:
+            for key, value in data['vecs'].items():
+                ds = w.create_dataset(key, shape=value.size, dtype='c16')
+                ds[slice(*value.owner_range)] = value.array
+
+            for key, value in data['mats'].items():
+                ds = w.create_dataset(key, shape=value.size, dtype='c16')
+                ds[slice(*value.owner_range), :] = value.getDenseArray()
 
 #endregion
